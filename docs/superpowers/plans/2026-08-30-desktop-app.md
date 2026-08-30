@@ -24,32 +24,30 @@
 - Create: `main.cjs` — BrowserWindow lifecycle, preferences, navigation policy, and IPC handlers.
 - Create: `preload.cjs` — minimal context-isolated clipboard/window bridge.
 - Create: `package.json` — scripts, Electron entry point, and portable build configuration.
-- Create: `tests/syntax-check.cjs` — parses main, preload, and the inline renderer script without running the app.
+- Create: `tests/syntax-check.cjs` — parses main, preload, and the inline renderer script plus bridge contracts.
 
-### Task 1: Add the Electron project shell
+### Task 1: Establish a failing syntax and contract check
 
-- [ ] Write the failing syntax-check test that loads the expected files and reports missing files.
-- [ ] Run `npm run check` and observe the expected missing-file failure.
-- [ ] Add `package.json`, `main.cjs`, `preload.cjs`, and `tests/syntax-check.cjs` with the exact scripts and secure BrowserWindow configuration from the spec.
-- [ ] Run `npm run check` and verify all three JavaScript contexts parse successfully.
+- [ ] Add `tests/syntax-check.cjs` that requires `main.cjs`, `preload.cjs`, and `clipboard-shelf.html`, and asserts that each JavaScript context parses. Also assert that the package scripts and bridge method names exist.
+- [ ] Run `node tests/syntax-check.cjs` and observe failure because the Desktop files do not yet exist.
 
-### Task 2: Add native clipboard and window controls
+### Task 2: Build the secure Electron shell
 
-- [ ] Add the isolated `window.desktopBridge` methods in `preload.cjs` and corresponding IPC handlers in `main.cjs`.
-- [ ] Run the syntax check and inspect the bridge surface for only the approved methods.
-- [ ] Add compact, draggable window controls to the HTML and make them call the bridge when available.
-- [ ] Keep the gear button as the only shelf-settings control and preserve standalone-browser behavior.
+- [ ] Add `package.json` with `main`, `start`, `check`, and `build:portable` scripts plus portable x64 Electron Builder configuration.
+- [ ] Add `main.cjs` with a 360×620 frameless BrowserWindow, 210×260 minimum size, always-on-top default, persisted bounds/preferences, denied navigation/new windows, and IPC handlers for clipboard and window actions.
+- [ ] Add `preload.cjs` with `contextBridge` methods limited to the approved `desktopBridge` surface.
+- [ ] Run the syntax/contract check and verify main/preload parse without executing Electron APIs in the test process.
 
-### Task 3: Wire native clipboard into the shelf
+### Task 3: Connect the renderer to native desktop behavior
 
-- [ ] Add native bridge preference to the renderer's paste path, converting returned image data URLs to the existing Blob/IndexedDB path.
-- [ ] Add native bridge preference to text and image copy paths, retaining existing browser fallbacks.
-- [ ] Run source checks for exact clipboard paths, safe rendering, and no external requests.
+- [ ] Add a draggable title region and compact minimize/always-on-top/close controls to `clipboard-shelf.html`; hide them when the file is opened outside Electron.
+- [ ] Prefer `window.desktopBridge.readClipboard()` for desktop paste and `writeText`/`writeImage` for desktop copy, preserving browser fallbacks and all existing shelf rules.
+- [ ] Run source checks for exact text preservation, safe rendering, no external requests, and disabled renderer Node access.
 
-### Task 4: Package and verify the desktop app
+### Task 4: Install, package, launch, and verify
 
-- [ ] Install the pinned development dependencies from `package.json`.
+- [ ] Install Electron and Electron Builder from `package.json`.
 - [ ] Run `npm run check` and `npm run build:portable`.
-- [ ] Launch with `npm start` and verify the visible compact window, always-on-top toggle, drag handle, minimize, close, resize, click-then-`Ctrl+V`, card copy, image thumbnail, and persistence behavior.
-- [ ] Confirm the portable executable exists under `dist/` and record its path and hash.
+- [ ] Launch with `npm start` and verify the visible window, always-on-top toggle, drag handle, minimize, close, resize, click-then-`Ctrl+V`, focused-card copy, image thumbnail, and persistence behavior.
+- [ ] Confirm the portable executable exists under `dist/` and record its path and SHA-256.
 - [ ] Commit only after source, packaging, and visible smoke checks pass.
