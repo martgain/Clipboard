@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title">
+  <title id="title">Clipboard Shelf</title>
+  <defs>
+    <linearGradient id="background" x1="32" y1="24" x2="224" y2="232" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18293f"/>
+      <stop offset="1" stop-color="#0c1423"/>
+    </linearGradient>
+    <linearGradient id="backCard" x1="52" y1="52" x2="191" y2="198" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#294e62"/>
+      <stop offset="1" stop-color="#1c3048"/>
+    </linearGradient>
+    <linearGradient id="shelf" x1="62" y1="190" x2="198" y2="224" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60e4d4"/>
+      <stop offset="1" stop-color="#27bfc4"/>
+    </linearGradient>
+    <linearGradient id="clip" x1="101" y1="33" x2="160" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff9a79"/>
+      <stop offset="1" stop-color="#f26870"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="8" width="240" height="240" rx="58" fill="url(#background)"/>
+  <rect x="9.5" y="9.5" width="237" height="237" rx="56.5" fill="none" stroke="#36516b" stroke-width="3"/>
+
+  <rect x="42" y="62" width="139" height="145" rx="27" fill="url(#backCard)" stroke="#4a7788" stroke-width="5"/>
+  <rect x="55" y="48" width="139" height="145" rx="27" fill="#35536b" stroke="#5a7d8d" stroke-width="5"/>
+
+  <rect x="66" y="59" width="127" height="143" rx="24" fill="#f7fafc"/>
+  <rect x="66" y="59" width="127" height="143" rx="24" fill="none" stroke="#d6e1e8" stroke-width="4"/>
+  <rect x="96" y="36" width="63" height="43" rx="19" fill="url(#clip)"/>
+  <rect x="112" y="29" width="31" height="23" rx="11.5" fill="#ffb091"/>
+  <rect x="119" y="36" width="17" height="10" rx="5" fill="#d75866"/>
+
+  <rect x="87" y="104" width="82" height="10" rx="5" fill="#6acfc8"/>
+  <rect x="87" y="128" width="64" height="10" rx="5" fill="#a9bac8"/>
+  <rect x="87" y="152" width="75" height="10" rx="5" fill="#a9bac8"/>
+
+  <path d="M52 190h152a12 12 0 0 1 12 12v4a20 20 0 0 1-20 20H60a20 20 0 0 1-20-20v-4a12 12 0 0 1 12-12Z" fill="url(#shelf)"/>
+  <path d="M68 207h120" stroke="#d9fffa" stroke-width="6" stroke-linecap="round" opacity=".9"/>
+</svg>

@@ -7,6 +7,14 @@
 
 تحسين Clipboard Shelf فوق النسخة الحالية من غير إعادة بناء الوظائف الموجودة أو تغيير سلوك البيانات. كل اختيار يُصنّف قبل التنفيذ إلى **موجود**، **تطوير**، أو **جديد**؛ الموجود يُثبت باختبارات ولا يُعاد تنفيذه، والتطوير يحافظ على API والبيانات القديمة، والجديد يُضاف بوحدة صغيرة قابلة للاختبار.
 
+## Implementation audit status
+
+- The selected development features are wired through the local Markdown/storage, Electron bridge, and compact renderer paths; the existing-only IDs remain covered without duplicate controls.
+- The search path includes text, OCR text, metadata, safe operators, Arabic normalization, source/date filters, deterministic ranking, and escaped highlights. A date-only upper bound includes the full selected day.
+- Image analysis supports bounded local PNG palette extraction and HEX/RGB/HSL output. QR/barcode handling is a validated capability adapter and reports `unsupported` when no decoder is available locally.
+- Collection nesting is validated and persisted through `parentId` with compact indentation; a dedicated drag-to-reparent control is intentionally outside this batch’s UI surface.
+- OCR metadata now records detected script language, while OCR index persistence is queued and rebuilt explicitly from settings so capture stays responsive.
+
 ## Baseline discovered before implementation
 
 - التطبيق Electron محلي على Windows، وملفات Markdown هي المصدر القابل للقراءة، مع media منفصلة وbackup snapshots.
@@ -109,4 +117,3 @@ Transaction generations الحالية هي مصدر Version History. نضيف f
 - [PasteBar](https://github.com/PasteBar/PasteBarApp): collections، local storage، backup، forms/templates.
 - [Electron clipboard API](https://www.electronjs.org/docs/latest/api/clipboard): formats وClipboardItem في main process.
 - [Electron safeStorage](https://www.electronjs.org/docs/latest/api/safe-storage): OS-backed encryption boundary.
-
