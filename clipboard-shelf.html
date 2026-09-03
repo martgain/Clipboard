@@ -3,403 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'">
 <title>رف الحافظة</title>
-<style>
-  :root {
-    color-scheme: light;
-    --bg: #f4f1ea;
-    --panel: #fffdf8;
-    --panel-strong: #fff3da;
-    --text: #1d2428;
-    --muted: #667071;
-    --line: #d8d0c2;
-    --primary: #0f766e;
-    --danger: #b42318;
-    --danger-bg: #fff0ed;
-    --shadow: 0 10px 26px rgba(34, 40, 43, 0.12);
-    --radius: 8px;
-    --mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
-    --sans: Tahoma, "Segoe UI", Arial, sans-serif;
-  }
-
-  [data-theme="dark"] {
-    color-scheme: dark;
-    --bg: #121717;
-    --panel: #1c2424;
-    --panel-strong: #24302f;
-    --text: #eef2ec;
-    --muted: #a9b3ad;
-    --line: #394644;
-    --primary: #2dd4bf;
-    --danger: #f87171;
-    --danger-bg: #351f1f;
-    --shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
-  }
-
-  html {
-    box-sizing: border-box;
-    overflow-x: hidden;
-  }
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: inherit;
-    min-width: 0;
-  }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    overflow-x: hidden;
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    line-height: 1.5;
-  }
-
-  button {
-    font: inherit;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--panel);
-    color: var(--text);
-    cursor: pointer;
-  }
-
-  button:hover {
-    border-color: var(--primary);
-  }
-
-  button:focus-visible,
-  .entry-card:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-  }
-
-  .app {
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 8px;
-  }
-
-  .topbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-  }
-
-  .topbar h1 {
-    margin: 0;
-    font-size: 1rem;
-    overflow-wrap: anywhere;
-  }
-
-  #settingsButton {
-    width: 2rem;
-    height: 2rem;
-    padding: 0;
-    flex: 0 0 auto;
-    font-size: 1.05rem;
-    line-height: 1;
-  }
-
-  .counts-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin: 2px 0 8px;
-    color: var(--muted);
-    font-size: 0.78rem;
-  }
-
-  body.is-dragging::after {
-    content: "";
-    position: fixed;
-    inset: 6px;
-    z-index: 5;
-    border: 2px dashed var(--primary);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-    pointer-events: none;
-  }
-
-  main {
-    display: grid;
-    gap: 14px;
-  }
-
-  .section-heading {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    margin-bottom: 6px;
-  }
-
-  .section-heading h2 {
-    margin: 0;
-    font-size: 0.88rem;
-    font-weight: 700;
-  }
-
-  .empty-state {
-    margin: 0;
-    padding: 8px 10px;
-    border: 1px dashed var(--line);
-    border-radius: var(--radius);
-    color: var(--muted);
-    font-size: 0.82rem;
-  }
-
-  .section-list {
-    display: grid;
-    gap: 8px;
-  }
-
-  .entry-card {
-    display: grid;
-    gap: 6px;
-    padding: 8px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--panel);
-    box-shadow: var(--shadow);
-  }
-
-  .entry-card.is-dragging {
-    opacity: 0.6;
-  }
-
-  .entry-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .entry-number {
-    flex: 0 0 auto;
-    min-width: 1.35rem;
-    height: 1.35rem;
-    padding: 0 0.15rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 999px;
-    background: var(--panel-strong);
-    color: var(--muted);
-    font-size: 0.7rem;
-    font-weight: 700;
-  }
-
-  .entry-content {
-    flex: 1 1 auto;
-    display: grid;
-    gap: 4px;
-  }
-
-  .entry-text {
-    margin: 0;
-    font-family: var(--mono);
-    font-size: 0.82rem;
-    line-height: 1.5;
-    unicode-bidi: plaintext;
-  }
-
-  .entry-text:not(.is-expanded) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-  }
-
-  .entry-text.is-expanded {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    max-height: 200px;
-    overflow: auto;
-  }
-
-  .expand-toggle {
-    justify-self: start;
-    padding: 0.1rem 0.35rem;
-    border: none;
-    background: transparent;
-    color: var(--primary);
-    font-size: 0.72rem;
-  }
-
-  .expand-toggle:hover {
-    border-color: transparent;
-    text-decoration: underline;
-  }
-
-  .entry-thumb {
-    display: block;
-    max-width: 96px;
-    max-height: 72px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    background: var(--panel-strong);
-    border: 1px solid var(--line);
-    border-radius: calc(var(--radius) - 2px);
-  }
-
-  .card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: 4px;
-  }
-
-  .icon-btn {
-    width: 1.9rem;
-    height: 1.9rem;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.92rem;
-    line-height: 1;
-  }
-
-  .icon-btn.is-pinned {
-    background: var(--panel-strong);
-    border-color: var(--primary);
-  }
-
-  .icon-btn.danger {
-    color: var(--danger);
-    background: var(--danger-bg);
-  }
-
-  .hidden {
-    display: none !important;
-  }
-
-  #settingsDialog {
-    width: min(360px, 92vw);
-    max-width: 92vw;
-    padding: 12px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--panel);
-    color: var(--text);
-  }
-
-  #settingsDialog::backdrop {
-    background: rgba(0, 0, 0, 0.35);
-  }
-
-  .settings-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .settings-heading h2 {
-    margin: 0;
-    font-size: 0.95rem;
-  }
-
-  .settings-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    padding: 6px 0;
-    border-top: 1px solid var(--line);
-  }
-
-  .settings-row:first-of-type {
-    border-top: none;
-  }
-
-  .settings-row button {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.85rem;
-  }
-
-  .settings-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-
-  .danger-text {
-    color: var(--danger);
-    background: var(--danger-bg);
-    border-color: color-mix(in srgb, var(--danger) 40%, var(--line));
-  }
-
-  .help-text {
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-size: 0.76rem;
-    line-height: 1.5;
-  }
-
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .toast-region {
-    position: fixed;
-    inset: auto 8px 8px 8px;
-    z-index: 10;
-    display: grid;
-    justify-items: center;
-    pointer-events: none;
-  }
-
-  .toast {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    max-width: min(400px, 100%);
-    padding: 6px 10px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--panel);
-    color: var(--text);
-    box-shadow: var(--shadow);
-    font-size: 0.82rem;
-    pointer-events: auto;
-  }
-
-  .toast button {
-    padding: 0.2rem 0.5rem;
-    border-color: var(--primary);
-    color: var(--primary);
-    font-weight: 700;
-    font-size: 0.8rem;
-  }
-</style>
+<link rel="stylesheet" href="./src/renderer/styles/tokens.css">
+<link rel="stylesheet" href="./src/renderer/styles/components.css">
 </head>
 <body tabindex="-1">
   <div id="app" class="app">
     <header class="topbar">
-      <h1>رف الحافظة</h1>
-      <button id="settingsButton" type="button" aria-haspopup="dialog" aria-controls="settingsDialog" title="الإعدادات" aria-label="فتح الإعدادات">⚙</button>
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <h1>رف الحافظة</h1>
+      </div>
+      <button id="keyboardLockButton" type="button" aria-pressed="false" title="قفل لوحة المفاتيح" aria-label="قفل لوحة المفاتيح">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+      </button>
+      <button id="colorPickerButton" type="button" aria-pressed="false" title="اختيار لون من الشاشة" aria-label="اختيار لون من الشاشة">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 4 6 6-8 8H5v-7l8-8 1 1Z"></path><path d="m13 5 6 6M5 18l-2 3"></path></svg>
+      </button>
+      <button id="ocrButton" type="button" aria-pressed="false" title="استخراج النص من الشاشة" aria-label="استخراج النص من الشاشة">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v16H5z"></path><path d="M8 8h8M8 12h8M8 16h5"></path></svg>
+      </button>
+      <button id="toolsMenuButton" type="button" aria-expanded="false" aria-controls="toolsMenu" title="أدوات" aria-label="فتح الأدوات">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1"></rect><rect x="14" y="4" width="6" height="6" rx="1"></rect><rect x="4" y="14" width="6" height="6" rx="1"></rect><rect x="14" y="14" width="6" height="6" rx="1"></rect></svg>
+      </button>
+      <div id="windowControls" class="window-controls" hidden aria-label="تحكم النافذة">
+        <button id="alwaysOnTopButton" class="window-btn" type="button" aria-pressed="true" title="إلغاء التثبيت فوق النوافذ" aria-label="إلغاء التثبيت فوق النوافذ">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4 6 0 1 5 3 3-5 1-2 7-2-7-5-1 3-3 1-5Z"></path><path d="M12 20v-7"></path></svg>
+        </button>
+        <button id="minimizeButton" class="window-btn" type="button" title="تصغير النافذة" aria-label="تصغير النافذة">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg>
+        </button>
+        <button id="closeButton" class="window-btn" type="button" title="إغلاق التطبيق" aria-label="إغلاق التطبيق">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <button id="linkMenuButton" type="button" aria-expanded="false" aria-controls="linkDrawer" title="القوائم المحفوظة" aria-label="فتح القوائم المحفوظة">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14M5 12h14M5 18h14"></path><circle cx="5" cy="6" r="1"></circle><circle cx="5" cy="12" r="1"></circle><circle cx="5" cy="18" r="1"></circle></svg>
+      </button>
+      <button id="searchToggleButton" type="button" aria-expanded="false" aria-controls="searchPanel" title="بحث" aria-label="فتح البحث">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5"></circle><path d="m15 15 5 5"></path></svg>
+      </button>
+      <button id="settingsButton" type="button" aria-haspopup="dialog" aria-controls="settingsDialog" title="الإعدادات" aria-label="فتح الإعدادات">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 14 4l.7 2a6.6 6.6 0 0 1 1.6.9l2-.5 1.4 1.5-.8 1.9c.4.5.7 1 .9 1.6l2 .8v2l-2 .8a6.6 6.6 0 0 1-.9 1.6l.8 1.9-1.4 1.5-2-.5a6.6 6.6 0 0 1-1.6.9l-.7 2-2 .5-2-.5-.7-2a6.6 6.6 0 0 1-1.6-.9l-2 .5-1.4-1.5.8-1.9a6.6 6.6 0 0 1-.9-1.6l-2-.8v-2l2-.8a6.6 6.6 0 0 1 .9-1.6l-.8-1.9 1.4-1.5 2 .5a6.6 6.6 0 0 1 1.6-.9l.7-2 2-.5Z"></path><circle cx="12" cy="12" r="2.7"></circle></svg>
+      </button>
     </header>
+
+    <div id="selectionToolbar" class="selection-toolbar" hidden>
+      <span id="selectionCount" class="selection-count">0 محدد</span>
+      <button id="toggleSelectionPinsButton" type="button" title="تثبيت أو إرجاع المحدد">نقل</button>
+      <button id="tagSelectionButton" type="button" title="إضافة وسم للمحدد">وسم</button>
+      <button id="deleteSelectionButton" type="button" class="danger-text" title="حذف المحدد">حذف</button>
+      <button id="saveSelectionButton" type="button">حفظ كقائمة</button>
+      <button id="copySelectionButton" type="button">نسخ كدفعة</button>
+      <button id="clearSelectionButton" type="button">إلغاء</button>
+    </div>
 
     <div class="counts-row" aria-label="إحصاءات الرف">
       <span id="pinnedCount">مثبتة: 0</span>
       <span aria-hidden="true">·</span>
-      <span id="normalCount">عادية: 0/50</span>
+      <span id="normalCount">عادية: 0/150</span>
+    </div>
+
+    <div id="searchPanel" class="search-panel" hidden>
+      <input id="searchInput" type="search" placeholder="ابحث في الرف" aria-label="البحث في الرف" autocomplete="off">
+      <select id="searchType" aria-label="نوع العنصر">
+        <option value="all">الكل</option>
+        <option value="text">نصوص</option>
+        <option value="image">صور</option>
+      </select>
+      <select id="searchTag" aria-label="الوسم"><option value="">كل الوسوم</option></select>
+      <input id="searchSource" type="search" placeholder="المصدر (مثل chrome.exe)" aria-label="مصدر العنصر" autocomplete="off">
+      <label class="search-date-field">من <input id="searchDateFrom" type="date" aria-label="تاريخ البداية"></label>
+      <label class="search-date-field">إلى <input id="searchDateTo" type="date" aria-label="تاريخ النهاية"></label>
     </div>
 
     <main aria-live="polite">
@@ -421,16 +97,88 @@
     </main>
   </div>
 
+  <div id="toolsMenu" class="tools-menu" role="menu" hidden>
+    <button id="overflowColorPickerButton" type="button" role="menuitem">اختيار لون</button>
+    <button id="overflowOcrButton" type="button" role="menuitem">قراءة نص من الشاشة</button>
+    <button id="overflowLinkMenuButton" type="button" role="menuitem">القوائم المحفوظة</button>
+    <button id="overflowSearchButton" type="button" role="menuitem">البحث</button>
+    <button id="overflowTransformButton" type="button" role="menuitem">تحويل النص المحدد</button>
+    <button id="overflowAnalyzeImageButton" type="button" role="menuitem">تحليل الصورة المحددة</button>
+  </div>
+
+  <section id="quickPalette" class="quick-palette" hidden aria-label="النسخ السريع">
+    <div class="quick-palette-surface" role="dialog" aria-modal="false" aria-labelledby="quickPaletteTitle">
+      <div class="quick-palette-heading">
+        <h2 id="quickPaletteTitle">نسخ سريع</h2>
+        <button id="closeQuickPaletteButton" class="icon-btn" type="button" title="إغلاق" aria-label="إغلاق النسخ السريع">×</button>
+      </div>
+      <input id="quickPaletteInput" class="quick-palette-input" type="search" placeholder="ابحث ثم Enter للنسخ" aria-label="البحث في النسخ السريع" aria-controls="quickPaletteList" autocomplete="off">
+      <div id="quickPaletteList" class="quick-palette-list" role="listbox" aria-label="العناصر المحفوظة"></div>
+      <p id="quickPaletteEmpty" class="quick-palette-empty" hidden>لا توجد نتيجة</p>
+      <small class="quick-palette-hint">↑ ↓ للتنقل · Enter للنسخ · Esc للإغلاق</small>
+    </div>
+  </section>
+
   <dialog id="settingsDialog" aria-labelledby="settingsTitle">
     <form method="dialog" class="settings-form">
       <div class="settings-heading">
         <h2 id="settingsTitle">الإعدادات</h2>
-        <button type="submit" class="icon-btn" aria-label="إغلاق الإعدادات" title="إغلاق">✕</button>
+        <button type="submit" class="icon-btn" aria-label="إغلاق الإعدادات" title="إغلاق">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+
+      <p class="settings-section-title">التقاط وخصوصية</p>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>المظهر</span>
+        </div>
+        <button id="themeToggle" type="button">الوضع الداكن</button>
       </div>
 
       <div class="settings-row">
-        <span>المظهر</span>
-        <button id="themeToggle" type="button">الوضع الداكن</button>
+        <div class="settings-label">
+          <span>التقاط تلقائي</span>
+          <small class="settings-note">يحفظ كل نسخة جديدة أثناء تشغيل التطبيق</small>
+        </div>
+        <button id="autoCaptureToggle" class="settings-switch" type="button" aria-pressed="true">مفعّل</button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>اختصار فتح الرف</span>
+          <small class="settings-note">اختصار عام لفتح النسخ السريع</small>
+        </div>
+        <div class="shortcut-control">
+          <input id="globalShortcutInput" type="text" value="CommandOrControl+Shift+Space" maxlength="80" spellcheck="false" aria-label="اختصار فتح الرف">
+          <button id="globalShortcutDefaultButton" type="button" title="استعادة الاختصار الافتراضي">افتراضي</button>
+          <button id="globalShortcutToggle" class="settings-switch" type="button" aria-pressed="false">متوقف</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>وضع الخصوصية</span>
+          <small class="settings-note">يوقف الالتقاط التلقائي فقط</small>
+        </div>
+        <button id="privacyModeToggle" class="settings-switch" type="button" aria-pressed="false">متوقف</button>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>حذف العادي بعد أيام</span>
+          <small class="settings-note">0 = بدون حذف تلقائي</small>
+        </div>
+        <input id="retentionDaysInput" type="number" min="0" max="3650" step="1" value="0" aria-label="عدد أيام الاحتفاظ">
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>فاصل النسخ المتعدد</span>
+          <small class="settings-note">يجب أن يكون في سطر مستقل</small>
+        </div>
+        <input id="batchSeparatorInput" maxlength="80" spellcheck="false" aria-label="فاصل النسخ المتعدد">
       </div>
 
       <div class="settings-row">
@@ -438,8 +186,31 @@
         <div class="settings-actions">
           <button id="exportButton" type="button">تصدير JSON</button>
           <button id="importButton" type="button">استيراد JSON</button>
+          <button id="restoreLocalBackupButton" type="button">استعادة آخر نسخة</button>
           <input id="importInput" class="sr-only" type="file" accept="application/json,.json" aria-label="اختيار ملف JSON للاستيراد">
         </div>
+      </div>
+
+      <p class="settings-section-title">سلامة البيانات</p>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>مساحة Markdown المحلية</span>
+          <small class="settings-note">نسخة قابلة للنقل مع الصور والقوائم</small>
+        </div>
+        <div class="settings-actions">
+          <button id="createMarkdownSnapshotButton" type="button">حفظ نسخة MD</button>
+          <button id="verifyMarkdownSnapshotButton" type="button">فحص آخر نسخة</button>
+          <button id="reloadMarkdownButton" type="button">إعادة تحميل</button>
+           <button id="openMarkdownDirectoryButton" type="button">فتح المجلد</button>
+           <button id="storageHealthButton" type="button">فحص التخزين</button>
+           <button id="appHealthButton" type="button">تشخيص التطبيق</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <span>القوائم المحفوظة</span>
+        <button id="manageLinkGroupsButton" type="button">إدارة القوائم</button>
       </div>
 
       <div class="settings-row">
@@ -447,1339 +218,118 @@
         <button id="clearNormalButton" type="button" class="danger-text">مسح الكل</button>
       </div>
 
-      <p class="help-text">أفلت نصًا أو صورة في أي مكان بالصفحة لإضافته، أو Ctrl+V للصق من الحافظة (نص أو صورة)، أو Ctrl+C على بطاقة مركّزة لنسخها كاملة. حد العادية 50 عنصرًا (نصوصًا وصورًا)، وتُحذف الأقدم تلقائيًا عند التجاوز. القيم المكررة لا تتكرر وتُنقل للأعلى. المثبتة غير محدودة وتُحذف يدويًا فقط. الصور تُخزَّن محليًا وتُضمَّن Base64 عند التصدير.</p>
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>سجل الإصدارات</span>
+          <small class="settings-note">إصدارات Markdown الآمنة محليًا</small>
+        </div>
+        <div class="settings-actions">
+          <button id="listVersionHistoryButton" type="button">عرض السجل</button>
+          <button id="restoreVersionHistoryButton" type="button">استعادة إصدار</button>
+        </div>
+      </div>
+
+      <div class="settings-row">
+        <div class="settings-label">
+          <span>فهرس OCR</span>
+          <small class="settings-note">إعادة البناء تتم في الخلفية عند الطلب</small>
+        </div>
+        <button id="rebuildOcrIndexButton" type="button">إعادة البناء</button>
+      </div>
+
+      <p class="help-text">الالتقاط التلقائي يحفظ أي نص أو صورة تنسخها أثناء تشغيل التطبيق. يمكنك أيضًا استخدام Ctrl+V أو السحب والإفلات. Ctrl+C على بطاقة مركّزة ينسخها كاملة. العادية 150 عنصرًا، والمثبتة بلا حد. البيانات محلية ويمكن نقلها عبر النسخة الاحتياطية.</p>
     </form>
   </dialog>
 
-  <output id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></output>
-
-  <script>
-    const STORAGE_KEY = "clipboard-shelf-state-v1";
-    const SCHEMA_VERSION = 1;
-    const NORMAL_LIMIT = 50;
-    const UNDO_WINDOW_MS = 9000;
-    const IMAGE_DB_NAME = "clipboard-shelf-images-v1";
-    const IMAGE_STORE_NAME = "images";
-
-    const elements = {
-      app: document.getElementById("app"),
-      pinnedList: document.getElementById("pinnedList"),
-      normalList: document.getElementById("normalList"),
-      pinnedEmpty: document.getElementById("pinnedEmpty"),
-      normalEmpty: document.getElementById("normalEmpty"),
-      settingsButton: document.getElementById("settingsButton"),
-      settingsDialog: document.getElementById("settingsDialog"),
-      themeToggle: document.getElementById("themeToggle"),
-      exportButton: document.getElementById("exportButton"),
-      importButton: document.getElementById("importButton"),
-      importInput: document.getElementById("importInput"),
-      clearNormalButton: document.getElementById("clearNormalButton"),
-      toastRegion: document.getElementById("toastRegion"),
-      pinnedCount: document.getElementById("pinnedCount"),
-      normalCount: document.getElementById("normalCount")
-    };
-
-    let state = loadState();
-    let lastUndo = null;
-    let undoTimer = null;
-    let toastTimer = null;
-    let imageDbPromise = null;
-    let activeImageObjectUrls = [];
-
-    function createDefaultState() {
-      return {
-        schemaVersion: SCHEMA_VERSION,
-        settings: {
-          theme: "light",
-          duplicatePolicy: "dedupe-move-to-top",
-          normalLimit: NORMAL_LIMIT
-        },
-        pinned: [],
-        normal: []
-      };
-    }
-
-    function normalizeState(raw) {
-      const fallbackState = createDefaultState();
-
-      if (!raw || typeof raw !== "object" || raw.schemaVersion !== SCHEMA_VERSION) {
-        return fallbackState;
-      }
-
-      const theme = raw.settings && raw.settings.theme === "dark" ? "dark" : "light";
-      const pinned = normalizeEntries(raw.pinned);
-      const pinnedSignatures = new Set(pinned.map((entry) => entrySignature(entry)));
-      const normal = normalizeEntries(raw.normal)
-        .filter((entry) => !pinnedSignatures.has(entrySignature(entry)))
-        .slice(0, NORMAL_LIMIT);
-
-      return {
-        schemaVersion: SCHEMA_VERSION,
-        settings: {
-          theme,
-          duplicatePolicy: "dedupe-move-to-top",
-          normalLimit: NORMAL_LIMIT
-        },
-        pinned,
-        normal
-      };
-    }
-
-    function loadState() {
-      try {
-        const savedState = localStorage.getItem(STORAGE_KEY);
-        return savedState ? normalizeState(JSON.parse(savedState)) : createDefaultState();
-      } catch (storageError) {
-        return createDefaultState();
-      }
-    }
-
-    function saveState(nextState) {
-      const normalizedState = normalizeState(nextState);
-      state = normalizedState;
-
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedState));
-      } catch (storageError) {
-        showToast("تعذر حفظ البيانات محليًا. قد تكون مساحة التخزين ممتلئة أو محظورة.", false);
-      }
-    }
-
-    function makeEntry(text, now) {
-      const timestamp = typeof now === "number" ? now : Date.now();
-
-      return {
-        id: createEntryId(timestamp),
-        type: "text",
-        text,
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-    }
-
-    function addText(text, targetList) {
-      if (!isNonEmptyText(text)) {
-        showToast("لم تتم الإضافة: النص فارغ.", false);
-        return false;
-      }
-
-      const destination = targetList === "pinned" ? "pinned" : "normal";
-      const existingMatch = findEntryByText(text);
-      const timestamp = Date.now();
-
-      if (existingMatch) {
-        const existingEntry = existingMatch.entry;
-        removeEntryById(existingMatch.listName, existingEntry.id);
-        existingEntry.updatedAt = timestamp;
-        state[existingMatch.listName].unshift(existingEntry);
-        enforceNormalLimit();
-        commitState("النص موجود بالفعل وتم نقله للأعلى.");
-        return true;
-      }
-
-      state[destination].unshift(makeEntry(text, timestamp));
-      enforceNormalLimit();
-      commitState(destination === "pinned" ? "تمت الإضافة إلى المثبتة." : "تمت الإضافة.");
-      return true;
-    }
-
-    async function addImage(blob, targetList) {
-      if (!blob || typeof blob.type !== "string" || !blob.type.startsWith("image/")) {
-        showToast("لم تتم الإضافة: ملف غير مدعوم.", false);
-        return false;
-      }
-
-      if (!blob.size) {
-        showToast("لم تتم الإضافة: الصورة فارغة.", false);
-        return false;
-      }
-
-      let arrayBuffer;
-
-      try {
-        arrayBuffer = await blob.arrayBuffer();
-      } catch (readError) {
-        showToast("تعذر قراءة الصورة.", false);
-        return false;
-      }
-
-      const hash = hashArrayBuffer(arrayBuffer);
-      const signature = imageSignature(blob.type, blob.size, hash);
-      const destination = targetList === "pinned" ? "pinned" : "normal";
-      const existingMatch = findEntryBySignature(signature);
-      const timestamp = Date.now();
-
-      if (existingMatch) {
-        const existingEntry = existingMatch.entry;
-        removeEntryById(existingMatch.listName, existingEntry.id);
-        existingEntry.updatedAt = timestamp;
-        state[existingMatch.listName].unshift(existingEntry);
-        enforceNormalLimit();
-        commitState("الصورة موجودة بالفعل وتم نقلها للأعلى.");
-        return true;
-      }
-
-      try {
-        await openImageDb();
-      } catch (dbError) {
-        showToast("تعذر حفظ الصورة: التخزين المحلي (IndexedDB) غير متاح.", false);
-        return false;
-      }
-
-      const blobKey = createEntryId(timestamp);
-
-      try {
-        await putImageBlob(blobKey, blob);
-      } catch (storeError) {
-        showToast("تعذر حفظ الصورة محليًا.", false);
-        return false;
-      }
-
-      const entry = {
-        id: createEntryId(timestamp + 1),
-        type: "image",
-        image: { blobKey, mimeType: blob.type, size: blob.size, hash },
-        createdAt: timestamp,
-        updatedAt: timestamp
-      };
-
-      state[destination].unshift(entry);
-      enforceNormalLimit();
-      commitState(destination === "pinned" ? "تمت إضافة الصورة إلى المثبتة." : "تمت إضافة الصورة.");
-      return true;
-    }
-
-    function togglePin(id) {
-      const normalEntry = removeEntryById("normal", id);
-      const timestamp = Date.now();
-
-      if (normalEntry) {
-        normalEntry.updatedAt = timestamp;
-        state.pinned.unshift(normalEntry);
-        commitState("تم التثبيت.");
-        return;
-      }
-
-      const pinnedEntry = removeEntryById("pinned", id);
-
-      if (pinnedEntry) {
-        pinnedEntry.updatedAt = timestamp;
-        state.normal.unshift(pinnedEntry);
-        enforceNormalLimit();
-        commitState("تم إلغاء التثبيت.");
-      }
-    }
-
-    function deleteEntry(listName, id) {
-      const deletedEntry = removeEntryById(listName, id);
-
-      if (!deletedEntry) {
-        return;
-      }
-
-      setUndoRecord({
-        type: "single",
-        listName,
-        entries: [deletedEntry]
-      });
-      commitState("تم الحذف.", true);
-    }
-
-    function clearNormalWithUndo() {
-      if (state.normal.length === 0) {
-        showToast("لا توجد عناصر عادية لمسحها.", false);
-        return;
-      }
-
-      const shouldClear = window.confirm("هل تريد مسح كل العناصر العادية؟ المثبتة لن تتأثر.");
-
-      if (!shouldClear) {
-        return;
-      }
-
-      setUndoRecord({
-        type: "clear-normal",
-        listName: "normal",
-        entries: cloneEntries(state.normal)
-      });
-      state.normal = [];
-      commitState("تم مسح العناصر العادية.", true);
-    }
-
-    function undoLastDeletion() {
-      if (!lastUndo) {
-        showToast("لا توجد عملية قابلة للتراجع.", false);
-        return;
-      }
-
-      if (lastUndo.type === "clear-normal") {
-        state.normal = cloneEntries(lastUndo.entries);
-      } else {
-        restoreDeletedEntry(lastUndo.listName, lastUndo.entries[0]);
-      }
-
-      lastUndo = null;
-      clearUndoTimer();
-      enforceNormalLimit();
-      commitState("تم التراجع.");
-    }
-
-    function enforceNormalLimit() {
-      if (state.normal.length > NORMAL_LIMIT) {
-        const evicted = state.normal.slice(NORMAL_LIMIT);
-        state.normal = state.normal.slice(0, NORMAL_LIMIT);
-        cleanupImageBlobs(evicted);
-      }
-    }
-
-    function findEntryByText(text) {
-      const pinnedEntry = state.pinned.find((entry) => entry.type !== "image" && entry.text === text);
-
-      if (pinnedEntry) {
-        return { listName: "pinned", entry: pinnedEntry };
-      }
-
-      const normalEntry = state.normal.find((entry) => entry.type !== "image" && entry.text === text);
-
-      return normalEntry ? { listName: "normal", entry: normalEntry } : null;
-    }
-
-    function findEntryBySignature(signature) {
-      const pinnedEntry = state.pinned.find((entry) => entrySignature(entry) === signature);
-
-      if (pinnedEntry) {
-        return { listName: "pinned", entry: pinnedEntry };
-      }
-
-      const normalEntry = state.normal.find((entry) => entrySignature(entry) === signature);
-
-      return normalEntry ? { listName: "normal", entry: normalEntry } : null;
-    }
-
-    function entrySignature(entry) {
-      return entry.type === "image"
-        ? imageSignature(entry.image.mimeType, entry.image.size, entry.image.hash)
-        : entry.text;
-    }
-
-    function imageSignature(mimeType, size, hash) {
-      return `image:${mimeType}:${size}:${hash}`;
-    }
-
-    function render() {
-      revokeActiveImageObjectUrls();
-      elements.pinnedCount.textContent = `مثبتة: ${state.pinned.length}`;
-      elements.normalCount.textContent = `عادية: ${state.normal.length}/${NORMAL_LIMIT}`;
-      elements.pinnedEmpty.classList.toggle("hidden", state.pinned.length > 0);
-      elements.normalEmpty.classList.toggle("hidden", state.normal.length > 0);
-      renderList("pinned", state.pinned);
-      renderList("normal", state.normal);
-    }
-
-    function renderList(listName, entries) {
-      const listElement = listName === "pinned" ? elements.pinnedList : elements.normalList;
-      listElement.replaceChildren();
-
-      entries.forEach((entry, index) => {
-        listElement.append(buildEntryCard(entry, listName, index));
-      });
-    }
-
-    function buildEntryCard(entry, listName, index) {
-      const card = document.createElement("article");
-      card.className = "entry-card";
-      card.draggable = true;
-      card.tabIndex = 0;
-      card.dataset.entryId = entry.id;
-      card.dataset.listName = listName;
-
-      const kindLabel = entry.type === "image" ? "صورة" : "نص";
-      const groupLabel = listName === "pinned" ? "مثبتة" : "عادية";
-      card.setAttribute("aria-label", `${kindLabel} ${groupLabel} رقم ${index + 1}، Ctrl+C للنسخ`);
-
-      card.addEventListener("dragstart", (event) => handleEntryDragStart(event, entry));
-      card.addEventListener("dragend", () => card.classList.remove("is-dragging"));
-
-      const numberBadge = document.createElement("span");
-      numberBadge.className = "entry-number";
-      numberBadge.textContent = String(index + 1);
-      numberBadge.setAttribute("aria-hidden", "true");
-
-      const contentBlock = entry.type === "image" ? buildImageContent(entry) : buildTextContent(entry);
-
-      const row = document.createElement("div");
-      row.className = "entry-row";
-      row.append(numberBadge, contentBlock);
-
-      card.append(row, buildCardActions(entry, listName));
-      return card;
-    }
-
-    function buildTextContent(entry) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "entry-content";
-
-      const textBlock = document.createElement("pre");
-      textBlock.className = "entry-text";
-      textBlock.textContent = entry.text;
-
-      const toggleButton = document.createElement("button");
-      toggleButton.type = "button";
-      toggleButton.className = "expand-toggle";
-      toggleButton.textContent = "اقرأ المزيد ⌄";
-      toggleButton.setAttribute("aria-expanded", "false");
-
-      toggleButton.addEventListener("click", () => {
-        const isExpanded = textBlock.classList.toggle("is-expanded");
-        toggleButton.textContent = isExpanded ? "إخفاء ⌃" : "اقرأ المزيد ⌄";
-        toggleButton.setAttribute("aria-expanded", String(isExpanded));
-      });
-
-      wrapper.append(textBlock, toggleButton);
-      return wrapper;
-    }
-
-    function buildImageContent(entry) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "entry-content";
-
-      const thumb = document.createElement("img");
-      thumb.className = "entry-thumb";
-      thumb.alt = "صورة محفوظة";
-      thumb.draggable = false;
-      thumb.loading = "lazy";
-      thumb.decoding = "async";
-
-      loadImageThumbnail(entry, thumb);
-
-      wrapper.append(thumb);
-      return wrapper;
-    }
-
-    async function loadImageThumbnail(entry, imgElement) {
-      try {
-        const blob = await getImageBlob(entry.image.blobKey);
-
-        if (!blob) {
-          return;
-        }
-
-        const objectUrl = URL.createObjectURL(blob);
-        activeImageObjectUrls.push(objectUrl);
-        imgElement.src = objectUrl;
-      } catch (loadError) {
-        imgElement.alt = "تعذر تحميل الصورة";
-      }
-    }
-
-    function buildCardActions(entry, listName) {
-      const actions = document.createElement("div");
-      actions.className = "card-actions";
-
-      const copyButton = createIconButton("⧉", "نسخ", () => copyEntryContent(entry));
-      const pinButton = createIconButton(
-        "📌",
-        listName === "pinned" ? "إلغاء التثبيت" : "تثبيت",
-        () => togglePin(entry.id),
-        listName === "pinned" ? "is-pinned" : ""
-      );
-      const deleteButton = createIconButton("🗑", "حذف", () => deleteEntry(listName, entry.id), "danger");
-
-      actions.append(copyButton, pinButton, deleteButton);
-      return actions;
-    }
-
-    async function copyText(text) {
-      try {
-        if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
-          await navigator.clipboard.writeText(text);
-          showToast("تم النسخ.");
-          return true;
-        }
-      } catch (clipboardError) {
-        console.debug("Clipboard API غير متاح، سيتم استخدام النسخ البديل.", clipboardError);
-      }
-
-      if (copyTextWithTextarea(text)) {
-        showToast("تم النسخ.");
-        return true;
-      }
-
-      showToast("تعذر النسخ تلقائيًا.", false);
-      return false;
-    }
-
-    async function copyEntryContent(entry) {
-      if (entry.type === "image") {
-        return copyImageEntry(entry);
-      }
-
-      return copyText(entry.text);
-    }
-
-    async function copyImageEntry(entry) {
-      if (!navigator.clipboard || typeof navigator.clipboard.write !== "function" || typeof window.ClipboardItem !== "function") {
-        showToast("نسخ الصور غير مدعوم في هذا المتصفح.", false);
-        return false;
-      }
-
-      try {
-        const blob = await getImageBlob(entry.image.blobKey);
-
-        if (!blob) {
-          showToast("تعذر العثور على بيانات الصورة.", false);
-          return false;
-        }
-
-        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-        showToast("تم نسخ الصورة.");
-        return true;
-      } catch (copyError) {
-        showToast("تعذر نسخ الصورة.", false);
-        return false;
-      }
-    }
-
-    function handleDrop(event) {
-      event.preventDefault();
-      document.body.classList.remove("is-dragging");
-
-      if (elements.settingsDialog.open) {
-        return;
-      }
-
-      if (!event.dataTransfer) {
-        showToast("لم يتم العثور على محتوى قابل للإضافة.", false);
-        return;
-      }
-
-      const files = event.dataTransfer.files;
-
-      if (files && files.length > 0) {
-        const imageFiles = Array.from(files).filter((file) => file.type.startsWith("image/"));
-
-        if (imageFiles.length === 0) {
-          showToast("هذا النوع من الملفات غير مدعوم؛ الصور فقط.", false);
-          return;
-        }
-
-        imageFiles.forEach((file) => addImage(file, "normal"));
-        return;
-      }
-
-      const droppedText = droppedPlainText(event.dataTransfer);
-      addText(droppedText, "normal");
-    }
-
-    function handleEntryDragStart(event, entry) {
-      if (!event.dataTransfer) {
-        return;
-      }
-
-      event.currentTarget.classList.add("is-dragging");
-      event.dataTransfer.effectAllowed = "copy";
-
-      if (entry.type === "image") {
-        const thumbElement = event.currentTarget.querySelector(".entry-thumb");
-        const objectUrl = thumbElement && thumbElement.src ? thumbElement.src : "";
-
-        if (objectUrl) {
-          try {
-            const extension = mimeTypeToExtension(entry.image.mimeType);
-            event.dataTransfer.setData("DownloadURL", `${entry.image.mimeType}:image-${entry.id}${extension}:${objectUrl}`);
-          } catch (dragError) {
-            console.debug("DownloadURL غير متاح، سيتم استخدام رابط الصورة.", dragError);
-          }
-
-          event.dataTransfer.setData("text/uri-list", objectUrl);
-        }
-
-        return;
-      }
-
-      event.dataTransfer.setData("text/plain", entry.text);
-    }
-
-    function mimeTypeToExtension(mimeType) {
-      const extensionMap = {
-        "image/png": ".png",
-        "image/jpeg": ".jpg",
-        "image/gif": ".gif",
-        "image/webp": ".webp",
-        "image/svg+xml": ".svg",
-        "image/bmp": ".bmp"
-      };
-
-      return extensionMap[mimeType] || "";
-    }
-
-    async function pasteFromClipboard() {
-      if (!navigator.clipboard) {
-        showToast("المتصفح لا يسمح بقراءة الحافظة هنا. جرّب السحب والإفلات.", false);
-        return;
-      }
-
-      if (typeof navigator.clipboard.read === "function") {
-        try {
-          const clipboardItems = await navigator.clipboard.read();
-          const foundImage = findClipboardImage(clipboardItems);
-
-          if (foundImage) {
-            const blob = await foundImage.clipboardItem.getType(foundImage.type);
-            await addImage(blob, "normal");
-            return;
-          }
-        } catch (readError) {
-          console.debug("قراءة الصور من الحافظة غير متاحة، سيتم تجربة النص.", readError);
-        }
-      }
-
-      if (typeof navigator.clipboard.readText !== "function") {
-        showToast("المتصفح لا يسمح بقراءة الحافظة هنا. جرّب السحب والإفلات.", false);
-        return;
-      }
-
-      try {
-        const clipboardText = await navigator.clipboard.readText();
-        addText(clipboardText, "normal");
-      } catch (clipboardError) {
-        showToast("تعذر قراءة الحافظة. تحقق من إذن الوصول لها.", false);
-      }
-    }
-
-    function findClipboardImage(clipboardItems) {
-      for (const clipboardItem of clipboardItems) {
-        const imageType = clipboardItem.types.find((type) => type.startsWith("image/"));
-
-        if (imageType) {
-          return { clipboardItem, type: imageType };
-        }
-      }
-
-      return null;
-    }
-
-    function applyTheme(theme) {
-      const selectedTheme = theme === "dark" ? "dark" : "light";
-      document.documentElement.dataset.theme = selectedTheme;
-      elements.themeToggle.textContent = selectedTheme === "dark" ? "الوضع الفاتح" : "الوضع الداكن";
-      elements.themeToggle.setAttribute(
-        "aria-label",
-        selectedTheme === "dark" ? "التبديل إلى الوضع الفاتح" : "التبديل إلى الوضع الداكن"
-      );
-    }
-
-    function toggleTheme() {
-      state.settings.theme = state.settings.theme === "dark" ? "light" : "dark";
-      applyTheme(state.settings.theme);
-      commitState(state.settings.theme === "dark" ? "تم تفعيل الوضع الداكن." : "تم تفعيل الوضع الفاتح.");
-    }
-
-    async function exportBackup() {
-      try {
-        const backupState = normalizeState(state);
-        const pinned = await serializeEntriesForExport(backupState.pinned);
-        const normal = await serializeEntriesForExport(backupState.normal);
-        const backupPayload = {
-          schemaVersion: SCHEMA_VERSION,
-          settings: backupState.settings,
-          pinned,
-          normal
-        };
-        const backupBlob = new Blob([JSON.stringify(backupPayload, null, 2)], {
-          type: "application/json"
-        });
-        const backupUrl = URL.createObjectURL(backupBlob);
-        const downloadLink = document.createElement("a");
-        downloadLink.href = backupUrl;
-        downloadLink.download = `clipboard-shelf-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.json`;
-        document.body.append(downloadLink);
-        downloadLink.click();
-        downloadLink.remove();
-        URL.revokeObjectURL(backupUrl);
-        showToast("تم تجهيز ملف النسخة الاحتياطية.");
-      } catch (exportError) {
-        showToast("تعذر تصدير النسخة الاحتياطية.", false);
-      }
-    }
-
-    async function serializeEntriesForExport(entries) {
-      const serialized = [];
-
-      for (const entry of entries) {
-        if (entry.type === "image") {
-          const blob = await getImageBlob(entry.image.blobKey);
-
-          if (!blob) {
-            continue;
-          }
-
-          const dataUrl = await blobToDataUrl(blob);
-          serialized.push({
-            id: entry.id,
-            type: "image",
-            image: {
-              mimeType: entry.image.mimeType,
-              size: entry.image.size,
-              hash: entry.image.hash,
-              dataUrl
-            },
-            createdAt: entry.createdAt,
-            updatedAt: entry.updatedAt
-          });
-        } else {
-          serialized.push(copyEntry(entry));
-        }
-      }
-
-      return serialized;
-    }
-
-    async function importBackup(file) {
-      if (!file) {
-        return;
-      }
-
-      const previousState = normalizeState(state);
-
-      try {
-        const fileText = await file.text();
-        const parsedRaw = JSON.parse(fileText);
-        const preparedIncoming = await prepareImportedState(parsedRaw);
-        mergeImportedState(preparedIncoming);
-        showToast("تم استيراد النسخة ودمجها بدون تكرار.");
-      } catch (importError) {
-        state = previousState;
-        saveState(state);
-        render();
-        showToast("فشل الاستيراد: تأكد أن الملف نسخة JSON صالحة.", false);
-      } finally {
-        elements.importInput.value = "";
-      }
-    }
-
-    async function prepareImportedState(raw) {
-      if (!raw || typeof raw !== "object" || raw.schemaVersion !== SCHEMA_VERSION) {
-        throw new Error("Unsupported backup");
-      }
-
-      if (!Array.isArray(raw.pinned) || !Array.isArray(raw.normal)) {
-        throw new Error("Malformed backup");
-      }
-
-      assertImportEntries(raw.pinned);
-      assertImportEntries(raw.normal);
-
-      const writtenBlobKeys = [];
-
-      try {
-        const pinned = await resolveImportedEntries(raw.pinned, writtenBlobKeys);
-        const normal = await resolveImportedEntries(raw.normal, writtenBlobKeys);
-        const theme = raw.settings && raw.settings.theme === "dark" ? "dark" : "light";
-
-        return normalizeState({
-          schemaVersion: SCHEMA_VERSION,
-          settings: { theme, duplicatePolicy: "dedupe-move-to-top", normalLimit: NORMAL_LIMIT },
-          pinned,
-          normal
-        });
-      } catch (resolveError) {
-        await Promise.all(writtenBlobKeys.map((key) => deleteImageBlob(key)));
-        throw resolveError;
-      }
-    }
-
-    async function resolveImportedEntries(entries, writtenBlobKeys) {
-      const resolved = [];
-
-      for (const entry of entries) {
-        if (entry.type === "image") {
-          const blob = dataUrlToBlob(entry.image.dataUrl);
-          const arrayBuffer = await blob.arrayBuffer();
-          const hash = hashArrayBuffer(arrayBuffer);
-          const blobKey = createEntryId(validTimestamp(entry.updatedAt) ? entry.updatedAt : Date.now());
-          await putImageBlob(blobKey, blob);
-          writtenBlobKeys.push(blobKey);
-          resolved.push({
-            id: entry.id,
-            type: "image",
-            image: { blobKey, mimeType: blob.type || entry.image.mimeType, size: blob.size, hash },
-            createdAt: entry.createdAt,
-            updatedAt: entry.updatedAt
-          });
-        } else {
-          resolved.push(entry);
-        }
-      }
-
-      return resolved;
-    }
-
-    function assertImportEntries(entries) {
-      const hasMalformedEntry = entries.some((entry) => {
-        if (
-          !entry
-          || typeof entry !== "object"
-          || typeof entry.id !== "string"
-          || entry.id.length === 0
-          || !validTimestamp(entry.createdAt)
-          || !validTimestamp(entry.updatedAt)
-        ) {
-          return true;
-        }
-
-        if (entry.type === "image") {
-          return !entry.image
-            || typeof entry.image !== "object"
-            || typeof entry.image.mimeType !== "string"
-            || !entry.image.mimeType.startsWith("image/")
-            || typeof entry.image.dataUrl !== "string"
-            || !entry.image.dataUrl.startsWith("data:image/");
-        }
-
-        return !isNonEmptyText(entry.text);
-      });
-
-      if (hasMalformedEntry) {
-        throw new Error("Malformed backup entry");
-      }
-    }
-
-    function mergeImportedState(incoming) {
-      const mergedState = normalizeState(state);
-      state = mergedState;
-
-      incoming.pinned.forEach((entry) => {
-        mergeImportedEntry("pinned", entry);
-      });
-      incoming.normal.forEach((entry) => {
-        mergeImportedEntry("normal", entry);
-      });
-
-      enforceNormalLimit();
-      commitState("");
-    }
-
-    function normalizeEntries(entries) {
-      if (!Array.isArray(entries)) {
-        return [];
-      }
-
-      const seenSignatures = new Set();
-      const normalizedEntries = [];
-
-      entries.forEach((raw) => {
-        const entry = normalizeSingleEntry(raw);
-
-        if (!entry) {
-          return;
-        }
-
-        const signature = entrySignature(entry);
-
-        if (seenSignatures.has(signature)) {
-          return;
-        }
-
-        seenSignatures.add(signature);
-        normalizedEntries.push(entry);
-      });
-
-      return normalizedEntries.sort((leftEntry, rightEntry) => rightEntry.updatedAt - leftEntry.updatedAt);
-    }
-
-    function normalizeSingleEntry(raw) {
-      if (!raw || typeof raw !== "object") {
-        return null;
-      }
-
-      const createdAt = validTimestamp(raw.createdAt) ? raw.createdAt : Date.now();
-      const updatedAt = validTimestamp(raw.updatedAt) ? raw.updatedAt : createdAt;
-      const id = typeof raw.id === "string" && raw.id ? raw.id : createEntryId(updatedAt);
-
-      if (raw.type === "image") {
-        if (!isValidImageMeta(raw.image)) {
-          return null;
-        }
-
-        return {
-          id,
-          type: "image",
-          image: {
-            blobKey: raw.image.blobKey,
-            mimeType: raw.image.mimeType,
-            size: raw.image.size,
-            hash: raw.image.hash
-          },
-          createdAt,
-          updatedAt
-        };
-      }
-
-      if (!isNonEmptyText(raw.text)) {
-        return null;
-      }
-
-      return { id, type: "text", text: raw.text, createdAt, updatedAt };
-    }
-
-    function isValidImageMeta(image) {
-      return Boolean(
-        image
-        && typeof image === "object"
-        && typeof image.blobKey === "string"
-        && image.blobKey.length > 0
-        && typeof image.mimeType === "string"
-        && image.mimeType.startsWith("image/")
-        && typeof image.size === "number"
-        && image.size >= 0
-        && typeof image.hash === "string"
-        && image.hash.length > 0
-      );
-    }
-
-    function mergeImportedEntry(listName, entry) {
-      const signature = entrySignature(entry);
-      const existingMatch = findEntryBySignature(signature);
-
-      if (existingMatch && existingMatch.listName === "pinned") {
-        moveEntryToTop("pinned", existingMatch.entry.id);
-        discardOrphanBlob(entry);
-        return;
-      }
-
-      if (listName === "pinned") {
-        if (existingMatch) {
-          const removed = removeEntryById(existingMatch.listName, existingMatch.entry.id);
-          cleanupImageBlobs(removed ? [removed] : []);
-        }
-
-        state.pinned.unshift(copyEntry(entry));
-        return;
-      }
-
-      if (existingMatch) {
-        moveEntryToTop(existingMatch.listName, existingMatch.entry.id);
-        discardOrphanBlob(entry);
-        return;
-      }
-
-      state.normal.unshift(copyEntry(entry));
-    }
-
-    function discardOrphanBlob(entry) {
-      if (entry.type === "image") {
-        deleteImageBlob(entry.image.blobKey);
-      }
-    }
-
-    function cleanupImageBlobs(entries) {
-      entries
-        .filter((entry) => entry.type === "image")
-        .forEach((entry) => deleteImageBlob(entry.image.blobKey));
-    }
-
-    function restoreDeletedEntry(listName, entry) {
-      const existingMatch = findEntryBySignature(entrySignature(entry));
-
-      if (existingMatch) {
-        moveEntryToTop(existingMatch.listName, existingMatch.entry.id);
-        return;
-      }
-
-      state[listName].unshift(copyEntry(entry));
-    }
-
-    function moveEntryToTop(listName, id) {
-      const movedEntry = removeEntryById(listName, id);
-
-      if (!movedEntry) {
-        return;
-      }
-
-      movedEntry.updatedAt = Date.now();
-      state[listName].unshift(movedEntry);
-    }
-
-    function removeEntryById(listName, id) {
-      const entryIndex = state[listName].findIndex((entry) => entry.id === id);
-
-      if (entryIndex < 0) {
-        return null;
-      }
-
-      return state[listName].splice(entryIndex, 1)[0];
-    }
-
-    function commitState(message, canUndo) {
-      state = normalizeState(state);
-      enforceNormalLimit();
-      saveState(state);
-      render();
-
-      if (message) {
-        showToast(message, true, canUndo);
-      }
-    }
-
-    function setUndoRecord(undoRecord) {
-      if (undoTimer) {
-        window.clearTimeout(undoTimer);
-        undoTimer = null;
-
-        if (lastUndo) {
-          cleanupImageBlobs(lastUndo.entries);
-        }
-      }
-
-      lastUndo = undoRecord;
-      undoTimer = window.setTimeout(() => {
-        if (lastUndo) {
-          cleanupImageBlobs(lastUndo.entries);
-        }
-
-        lastUndo = null;
-        undoTimer = null;
-      }, UNDO_WINDOW_MS);
-    }
-
-    function clearUndoTimer() {
-      if (undoTimer) {
-        window.clearTimeout(undoTimer);
-        undoTimer = null;
-      }
-    }
-
-    function showToast(message, isSuccess, canUndo) {
-      if (toastTimer) {
-        window.clearTimeout(toastTimer);
-      }
-
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      toast.setAttribute("role", isSuccess === false ? "alert" : "status");
-
-      const messageText = document.createElement("span");
-      messageText.textContent = message;
-      toast.append(messageText);
-
-      if (canUndo) {
-        const undoButton = createIconButton("↺", "التراجع عن الحذف", undoLastDeletion);
-        undoButton.textContent = "تراجع";
-        toast.append(undoButton);
-      }
-
-      elements.toastRegion.replaceChildren(toast);
-      toastTimer = window.setTimeout(() => {
-        elements.toastRegion.replaceChildren();
-        toastTimer = null;
-      }, canUndo ? UNDO_WINDOW_MS : 3600);
-    }
-
-    function createIconButton(icon, label, onClick, extraClass) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "icon-btn" + (extraClass ? ` ${extraClass}` : "");
-      button.textContent = icon;
-      button.title = label;
-      button.setAttribute("aria-label", label);
-      button.addEventListener("click", onClick);
-      return button;
-    }
-
-    function droppedPlainText(dataTransfer) {
-      const textPayload = dataTransfer.getData("text/plain");
-
-      if (textPayload) {
-        return textPayload;
-      }
-
-      const uriPayload = dataTransfer.getData("text/uri-list");
-
-      if (!uriPayload) {
-        return "";
-      }
-
-      return uriPayload
-        .split(/\r?\n/)
-        .find((line) => line && !line.startsWith("#")) || "";
-    }
-
-    function copyTextWithTextarea(text) {
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      textarea.setAttribute("readonly", "");
-      textarea.style.position = "fixed";
-      textarea.style.inset = "0 auto auto 0";
-      textarea.style.width = "1px";
-      textarea.style.height = "1px";
-      textarea.style.opacity = "0";
-      document.body.append(textarea);
-      textarea.select();
-
-      let didCopy = false;
-
-      try {
-        didCopy = document.execCommand("copy");
-      } catch (copyError) {
-        didCopy = false;
-      }
-
-      textarea.remove();
-      return didCopy;
-    }
-
-    function isNonEmptyText(candidateText) {
-      return typeof candidateText === "string" && candidateText.trim().length > 0;
-    }
-
-    function validTimestamp(timestamp) {
-      return typeof timestamp === "number" && Number.isFinite(timestamp) && timestamp >= 0;
-    }
-
-    function copyEntry(entry) {
-      const base = {
-        id: entry.id,
-        type: entry.type === "image" ? "image" : "text",
-        createdAt: entry.createdAt,
-        updatedAt: entry.updatedAt
-      };
-
-      if (base.type === "image") {
-        base.image = {
-          blobKey: entry.image.blobKey,
-          mimeType: entry.image.mimeType,
-          size: entry.image.size,
-          hash: entry.image.hash
-        };
-      } else {
-        base.text = entry.text;
-      }
-
-      return base;
-    }
-
-    function cloneEntries(entries) {
-      return entries.map(copyEntry);
-    }
-
-    function createEntryId(timestamp) {
-      const randomPart = Math.random().toString(36).slice(2, 10);
-      return `entry-${timestamp}-${randomPart}`;
-    }
-
-    function getEntryFromCard(card) {
-      if (!card) {
-        return null;
-      }
-
-      const listName = card.dataset.listName;
-      const id = card.dataset.entryId;
-      const list = state[listName];
-
-      return list ? list.find((entry) => entry.id === id) || null : null;
-    }
-
-    function openImageDb() {
-      if (imageDbPromise) {
-        return imageDbPromise;
-      }
-
-      imageDbPromise = new Promise((resolve, reject) => {
-        if (!window.indexedDB) {
-          reject(new Error("IndexedDB unavailable"));
-          return;
-        }
-
-        const request = indexedDB.open(IMAGE_DB_NAME, 1);
-
-        request.onupgradeneeded = () => {
-          request.result.createObjectStore(IMAGE_STORE_NAME);
-        };
-
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error || new Error("IndexedDB open failed"));
-      });
-
-      return imageDbPromise;
-    }
-
-    async function putImageBlob(key, blob) {
-      const db = await openImageDb();
-
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(IMAGE_STORE_NAME, "readwrite");
-        transaction.objectStore(IMAGE_STORE_NAME).put(blob, key);
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = () => reject(transaction.error);
-      });
-    }
-
-    async function getImageBlob(key) {
-      const db = await openImageDb();
-
-      return new Promise((resolve, reject) => {
-        const transaction = db.transaction(IMAGE_STORE_NAME, "readonly");
-        const request = transaction.objectStore(IMAGE_STORE_NAME).get(key);
-        request.onsuccess = () => resolve(request.result || null);
-        request.onerror = () => reject(request.error);
-      });
-    }
-
-    async function deleteImageBlob(key) {
-      try {
-        const db = await openImageDb();
-
-        await new Promise((resolve, reject) => {
-          const transaction = db.transaction(IMAGE_STORE_NAME, "readwrite");
-          transaction.objectStore(IMAGE_STORE_NAME).delete(key);
-          transaction.oncomplete = () => resolve();
-          transaction.onerror = () => reject(transaction.error);
-        });
-      } catch (dbError) {
-        console.warn("تعذر تنظيف بيانات صورة محلية.", dbError);
-      }
-    }
-
-    function hashArrayBuffer(arrayBuffer) {
-      const bytes = new Uint8Array(arrayBuffer);
-      let hash = 0x811c9dc5;
-
-      for (let i = 0; i < bytes.length; i++) {
-        hash ^= bytes[i];
-        hash = Math.imul(hash, 0x01000193);
-      }
-
-      return (hash >>> 0).toString(16);
-    }
-
-    function blobToDataUrl(blob) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error || new Error("Failed to read blob"));
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    function dataUrlToBlob(dataUrl) {
-      const commaIndex = dataUrl.indexOf(",");
-      const header = dataUrl.slice(0, commaIndex);
-      const base64Data = dataUrl.slice(commaIndex + 1);
-      const mimeMatch = /data:([^;]+);base64/.exec(header);
-      const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
-      const binaryString = atob(base64Data);
-      const bytes = new Uint8Array(binaryString.length);
-
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      return new Blob([bytes], { type: mimeType });
-    }
-
-    function revokeActiveImageObjectUrls() {
-      activeImageObjectUrls.forEach((url) => URL.revokeObjectURL(url));
-      activeImageObjectUrls = [];
-    }
-
-    function handleGlobalKeydown(event) {
-      const isModifierPressed = event.ctrlKey || event.metaKey;
-
-      if (!isModifierPressed) {
-        return;
-      }
-
-      const key = event.key.toLowerCase();
-
-      if (key === "v") {
-        event.preventDefault();
-        pasteFromClipboard();
-        return;
-      }
-
-      if (key === "c") {
-        const focusedCard = document.activeElement && document.activeElement.closest
-          ? document.activeElement.closest(".entry-card")
-          : null;
-        const focusedEntry = getEntryFromCard(focusedCard);
-
-        if (focusedEntry) {
-          event.preventDefault();
-          copyEntryContent(focusedEntry);
-        }
-      }
-    }
-
-    function activatePageFromClick(event) {
-      const clickedElement = event.target instanceof Element ? event.target : null;
-      const clickedInteractiveElement = clickedElement && clickedElement.closest(
-        "button, input, select, textarea, a, dialog, .entry-card, [contenteditable=\"true\"]"
-      );
-
-      if (!clickedInteractiveElement) {
-        document.body.focus({ preventScroll: true });
-      }
-    }
-
-    function isDialogClickOutsideContent(event, dialog) {
-      const rect = dialog.getBoundingClientRect();
-      return (
-        event.clientX < rect.left ||
-        event.clientX > rect.right ||
-        event.clientY < rect.top ||
-        event.clientY > rect.bottom
-      );
-    }
-
-    document.addEventListener("dragenter", (event) => {
-      if (elements.settingsDialog.open) {
-        return;
-      }
-
-      event.preventDefault();
-      document.body.classList.add("is-dragging");
-    });
-
-    document.addEventListener("dragover", (event) => {
-      if (elements.settingsDialog.open) {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = "copy";
-      }
-    });
-
-    document.addEventListener("dragleave", (event) => {
-      if (!event.relatedTarget) {
-        document.body.classList.remove("is-dragging");
-      }
-    });
-
-    document.addEventListener("drop", handleDrop);
-
-    elements.settingsButton.addEventListener("click", () => elements.settingsDialog.showModal());
-
-    elements.settingsDialog.addEventListener("click", (event) => {
-      if (event.target === elements.settingsDialog && isDialogClickOutsideContent(event, elements.settingsDialog)) {
-        elements.settingsDialog.close();
-      }
-    });
-
-    elements.themeToggle.addEventListener("click", toggleTheme);
-    elements.exportButton.addEventListener("click", exportBackup);
-    elements.importButton.addEventListener("click", () => elements.importInput.click());
-    elements.importInput.addEventListener("change", () => importBackup(elements.importInput.files[0]));
-    elements.clearNormalButton.addEventListener("click", clearNormalWithUndo);
-
-    document.addEventListener("click", activatePageFromClick);
-    document.addEventListener("keydown", handleGlobalKeydown);
-
-    applyTheme(state.settings.theme);
-    render();
-  </script>
+  <section id="linkDrawer" class="link-drawer" hidden aria-labelledby="linkDrawerTitle">
+    <div class="drawer-heading">
+      <h2 id="linkDrawerTitle">القوائم المحفوظة</h2>
+      <div class="drawer-actions">
+        <button id="toggleLinkDrawerSizeButton" type="button" title="تصغير القائمة" aria-label="تصغير قائمة الروابط">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5 4 12l5 7M15 5l5 7-5 7"></path></svg>
+        </button>
+        <button id="closeLinkDrawerButton" type="button" title="إغلاق القوائم المحفوظة" aria-label="إغلاق القوائم المحفوظة">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg><span class="drawer-button-label">إغلاق</span>
+        </button>
+      </div>
+    </div>
+    <section id="smartCollectionsSection" class="drawer-section" aria-labelledby="smartCollectionsTitle">
+      <div class="drawer-section-heading">
+        <h3 id="smartCollectionsTitle" class="drawer-section-title">التجميعات الذكية</h3>
+        <div class="drawer-actions">
+          <button id="newSmartCollectionButton" type="button" title="حفظ البحث كتجميعة ذكية" aria-label="حفظ البحث كتجميعة ذكية">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span class="drawer-button-label">تجميعة جديدة</span>
+          </button>
+          <button id="clearActiveCollectionButton" type="button" title="إلغاء الفلتر الذكي" aria-label="إلغاء الفلتر الذكي" hidden>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg><span class="drawer-button-label">إلغاء الفلتر</span>
+          </button>
+        </div>
+      </div>
+      <div id="smartCollectionList" class="drawer-section-list"></div>
+      <p id="smartCollectionsEmpty" class="empty-state">لا توجد تجميعات ذكية</p>
+    </section>
+
+    <section id="savedLinkGroupsSection" class="drawer-section" aria-labelledby="savedLinkGroupsTitle">
+      <div class="drawer-section-heading">
+        <h3 id="savedLinkGroupsTitle" class="drawer-section-title">القوائم المحفوظة</h3>
+        <div class="drawer-actions">
+          <button id="newLinkGroupButton" type="button" title="قائمة جديدة" aria-label="إنشاء قائمة جديدة">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg><span class="drawer-button-label">قائمة جديدة</span>
+          </button>
+        </div>
+      </div>
+      <div id="linkGroupList" class="drawer-section-list"></div>
+      <p id="linkGroupEmpty" class="empty-state">لا توجد قوائم محفوظة</p>
+    </section>
+
+    <section id="trashSection" class="drawer-section" aria-labelledby="trashTitle">
+      <div class="drawer-section-heading">
+        <h3 id="trashTitle" class="drawer-section-title">المحذوفات</h3>
+        <div class="drawer-actions">
+          <button id="purgeAllTrashButton" type="button" title="حذف كل المحذوفات نهائيًا" aria-label="حذف كل المحذوفات نهائيًا">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 4h4l1 3H9l1-3ZM7 7l1 13h8l1-13M10 11v5M14 11v5"></path></svg><span class="drawer-button-label">إفراغ السلة</span>
+          </button>
+        </div>
+      </div>
+      <div id="trashList" class="drawer-section-list"></div>
+      <p id="trashEmpty" class="empty-state">سلة المحذوفات فارغة</p>
+    </section>
+  </section>
+  <button id="drawerBackdrop" class="drawer-backdrop" type="button" hidden aria-label="إغلاق القوائم المحفوظة"></button>
+
+  <dialog id="linkGroupDialog" aria-labelledby="linkGroupDialogTitle">
+    <form id="linkGroupForm" class="group-editor">
+      <div class="settings-heading">
+        <h2 id="linkGroupDialogTitle">قائمة محفوظة</h2>
+        <button id="closeLinkGroupDialogButton" type="button" class="icon-btn" aria-label="إغلاق">×</button>
+      </div>
+      <label>اسم القائمة<input id="linkGroupNameInput" required maxlength="80" autocomplete="off"></label>
+      <label>أيقونة المجموعة<div id="groupIconPicker" class="group-icon-picker" role="radiogroup" aria-label="اختيار أيقونة المجموعة"></div></label>
+      <label>العناصر — افصل بينها بعلامة الدفعة<textarea id="linkGroupLinksInput" required spellcheck="false"></textarea></label>
+      <div class="group-editor-actions">
+        <button type="submit">حفظ</button>
+        <button id="cancelLinkGroupButton" type="button">إلغاء</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="inspectorDialog" aria-labelledby="inspectorTitle">
+    <form method="dialog" class="inspector-dialog-form">
+      <div class="settings-heading">
+        <h2 id="inspectorTitle">تفاصيل العنصر</h2>
+        <button id="closeInspectorButton" type="submit" class="icon-btn" aria-label="إغلاق التفاصيل" title="إغلاق">×</button>
+      </div>
+      <div id="inspectorPreview" class="inspector-preview"></div>
+      <dl id="inspectorMetadata" class="inspector-metadata"></dl>
+    </form>
+  </dialog>
+
+  <output id="toastRegion" class="toast-region"></output>
+  <output id="liveStatus" class="sr-only" aria-live="polite" aria-atomic="true"></output>
+
+  <script src="./link-group-icons.js"></script>
+  <script src="./src/shared/accelerator.js"></script>
+  <script src="./src/shared/trash-store.js"></script>
+  <script type="module" src="./src/renderer/app.js"></script>
 </body>
 </html>

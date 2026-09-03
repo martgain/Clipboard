@@ -1,0 +1,15 @@
+node_modules/
+dist*/
+.runtime-*/
+.superpowers/
+audit-output/
+recovery/
+*.log
+*.traineddata
+
+# Bundled PP-OCRv5 model files are required by the packaged offline OCR path.
+
+# Local Electron profile and generated media stay on the user's device.
+clipboard-shelf-data/
+media/
+backups/

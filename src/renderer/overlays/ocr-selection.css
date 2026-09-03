@@ -1,0 +1,22 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  cursor: crosshair;
+  user-select: none;
+}
+
+body {
+  background: rgba(0, 0, 0, 0.28);
+}
+
+#selectionBox {
+  position: fixed;
+  display: none;
+  border: 2px solid #ff8a7b;
+  background: rgba(180, 35, 24, 0.15);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
