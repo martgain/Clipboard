@@ -12,12 +12,13 @@
 
 ## Implementation status (2026-09-03)
 
-- Tasks 0–7 are implemented in the current branch with pure-unit, persistence, bridge, renderer, and packaged smoke coverage; the final full verification and PR gates remain in Task 8.
+- Tasks 0–7 are implemented in the current branch with pure-unit, persistence, bridge, renderer, and packaged smoke coverage; the final verification gates passed and PR #1 is open.
 - Status-only IDs `1, 5, 10, 14, 21, 24, 30, 42, 46, 47, 82, 88, 91, 92, 95` were audited and retained; ID 95 was listed once despite the duplicate user selection.
 - QR/barcode detection is capability-adapted and returns `unsupported` when no local decoder is bundled; it never fabricates a result or sends image bytes over the network.
 - Nested smart-collection parent validation and rendering are implemented; changing a collection parent is currently a storage/normalization contract, not a dedicated drag-to-move control.
 - OCR index rebuild is local and queued, exposed as an explicit settings action; capture does not synchronously OCR every image.
 - Search date-only `dateTo` values are inclusive through the selected day, covered by regression tests in both backend and renderer paths.
+- `debate-review` was invoked for PR #1 but its main reviewer lane remained stuck on repeated environment/allowlist command failures; no review was posted, so the PR remains open for a clean rerun.
 
 ## Global Constraints
 
@@ -245,7 +246,7 @@
 - [x] **Step 3:** Run `npm.cmd audit --omit=dev --audit-level=high`, manifest verification, and existing ASAR/package tests.
 - [x] **Step 4:** Build portable only if the source tree can be packaged without including user-data/runtime audit directories; verify artifact contents and startup with an isolated profile.
 - [x] **Step 5:** Run clean-code guard on the complete production diff and test guard on changed tests; fix actionable findings and rerun the gates.
-- [ ] **Step 6:** Review every changed/untracked file, ensure no user data or temporary screenshots enter the commit, and create a commit containing only the implementation/docs intended for this PR.
+- [x] **Step 6:** Review every changed/untracked file, ensure no user data or temporary screenshots enter the commit, and create a commit containing only the implementation/docs intended for this PR.
 - [ ] **Step 7:** Add `https://github.com/martgain/Clipboard` as `origin` only if absent, push the branch, create a PR, and run debate-review on the PR URL.
 - [ ] **Step 8:** Resolve only review findings that are supported by the spec and fresh tests; rerun full verification and report exact PR URL/status.
 
